@@ -2,33 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 
-class UserController extends Controller
+class PostController extends Controller
 {
     public function index()
     {
-        $users = User::latest()->get();
+        $posts = Post::latest()->get();
 
         return response()->json([
             'con' => true,
-            'data' => $users,
+            'data' => $posts,
         ], Response::HTTP_OK);
     }
 
     public function store(Request $request)
     {
-        // $user = User::create($request->all());
-        // return response()->json($user, 201);
-
         $rules = [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'phone' => 'required|unique:users,phone'
+            'category_id' => 'required',
+            'tag_id' => 'required',
+            'user_id' => 'required',
+            'title' => 'required|string|max:255',
+            'content' => 'required|string|max:255',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -41,47 +39,49 @@ class UserController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $user = User::create($request->all());
+        $post = Post::create($request->all());
 
         return response()->json([
             'con' => true,
-            'message' => 'User created successfully',
-            'data' => $user,
+            'message' => 'Post created successfully',
+            'data' => $post,
         ], Response::HTTP_CREATED);
     }
 
     public function show($id)
     {
-        $user = User::find($id);
+        $post = Post::find($id);
 
-        if (!$user) {
+        if (!$post) {
             return response()->json([
                 'con' => false,
-                'message' => 'User not found',
+                'message' => 'Post not found',
             ], Response::HTTP_NOT_FOUND);
         }
 
         return response()->json([
             'con' => true,
-            'data' => $user,
+            'data' => $post,
         ], Response::HTTP_OK);
     }
 
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
+        $post = Post::find($id);
 
-        if (!$user) {
+        if (!$post) {
             return response()->json([
                 'con' => false,
-                'message' => 'User not found',
+                'message' => 'Post not found',
             ], Response::HTTP_NOT_FOUND);
         }
 
         $rules = [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users,email,' . $id,
-            'password' => 'sometimes|string|min:6', // "sometimes" means only validate if present
+            'category_id' => 'required',
+            'tag_id' => 'required',
+            'user_id' => 'required',
+            'title' => 'required|string|max:255',
+            'content' => 'required|string|max:255',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -94,31 +94,31 @@ class UserController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $user->update($request->all());
+        $post->update($request->all());
 
         return response()->json([
             'con' => true,
-            'message' => 'User updated successfully',
-            'data' => $user,
+            'message' => 'Post updated successfully',
+            'data' => $post,
         ], Response::HTTP_OK);
     }
 
     public function destroy($id)
     {
-        $user = User::find($id);
+        $post = Post::find($id);
 
-        if (!$user) {
+        if (!$post) {
             return response()->json([
                 'con' => false,
-                'message' => 'User not found',
+                'message' => 'Post not found',
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $user->delete();
+        $post->delete();
 
         return response()->json([
             'con' => true,
-            'message' => 'User deleted successfully',
+            'message' => 'Post deleted successfully',
         ], Response::HTTP_OK);
     }
 }
