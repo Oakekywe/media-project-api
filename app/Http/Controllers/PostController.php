@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::latest()->get();
+        $posts = Post::latest('updated_at')->get();
 
         return response()->json([
             'con' => true,
@@ -26,7 +27,7 @@ class PostController extends Controller
             'tag_id' => 'required',
             'user_id' => 'required',
             'title' => 'required|string|max:255',
-            'content' => 'required|string|max:255',
+            'content' => 'required|string',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -119,6 +120,48 @@ class PostController extends Controller
         return response()->json([
             'con' => true,
             'message' => 'Post deleted successfully',
+        ], Response::HTTP_OK);
+    }
+
+    public function filterByTag(Request $request, $tagId)
+    {
+        $posts = Post::select("id", "title", "content", "image")
+            ->where("tag_id", $tagId)
+            ->latest('created_at')
+            ->paginate(6);
+        // $posts = DB::select('SELECT * FROM posts WHERE tag_id = ?', [$tagId]);
+        if ($posts->isEmpty()) {
+            return response()->json([
+                'con' => false,
+                'message' => 'Posts not found',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'con' => true,
+            'message' => "posts by tag",
+            'data' => $posts,
+        ], Response::HTTP_OK);
+    }
+
+    public function filterByCat(Request $request, $catId)
+    {
+        $posts = Post::select("id", "title", "content", "image")
+            ->where("category_id", $catId)
+            ->latest('created_at')
+            ->paginate(6);
+        // $posts = DB::select('SELECT * FROM posts WHERE tag_id = ?', [$tagId]);
+        if ($posts->isEmpty()) {
+            return response()->json([
+                'con' => false,
+                'message' => 'Posts not found',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'con' => true,
+            'message' => "posts by cat",
+            'data' => $posts,
         ], Response::HTTP_OK);
     }
 }
