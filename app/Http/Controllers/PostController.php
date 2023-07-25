@@ -10,9 +10,19 @@ use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
-    public function index()
+    // public function index()
+    // {
+    //     $posts = Post::latest('updated_at')->paginate(12);
+
+    //     return response()->json([
+    //         'con' => true,
+    //         'data' => $posts,
+    //     ], Response::HTTP_OK);
+    // }
+
+    public function paginate($page)
     {
-        $posts = Post::latest('updated_at')->get();
+        $posts = Post::latest('updated_at')->paginate(12, ['*'], 'page', $page);
 
         return response()->json([
             'con' => true,
@@ -82,7 +92,7 @@ class PostController extends Controller
             'tag_id' => 'required',
             'user_id' => 'required',
             'title' => 'required|string|max:255',
-            'content' => 'required|string|max:255',
+            'content' => 'required|string',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -146,11 +156,13 @@ class PostController extends Controller
 
     public function filterByCat(Request $request, $catId)
     {
-        $posts = Post::select("id", "title", "content", "image")
+        $posts = Post::select("id", "title", "content", "image", "category_id")
+            ->with(['category' => function ($query) {
+                $query->select('id', 'name');
+            }])
             ->where("category_id", $catId)
             ->latest('created_at')
             ->paginate(6);
-        // $posts = DB::select('SELECT * FROM posts WHERE tag_id = ?', [$tagId]);
         if ($posts->isEmpty()) {
             return response()->json([
                 'con' => false,

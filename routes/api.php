@@ -13,6 +13,7 @@ Route::apiResource('users', UserController::class);
 Route::apiResource('cats', CategoryController::class);
 Route::apiResource('tags', TagController::class);
 Route::apiResource('posts', PostController::class);
+Route::get('posts/paginate/{page}', [PostController::class, 'paginate']);
 
 Route::get('posts/filter/by-tag/{id}', [PostController::class, 'filterByTag']);
 Route::get('posts/filter/by-cat/{id}', [PostController::class, 'filterByCat']);
